@@ -11,27 +11,27 @@ async def async_setup_entry(
 ):
     """Set up the switch platform from a config entry."""
     name = entry.data["name"]
-    linked_switch = entry.data["linked_switch"]
+    linked_entity = entry.data["linked_entity"]
 
-    async_add_entities([HwControl(name, linked_switch)])
+    async_add_entities([HwControl(name, linked_entity)])
 
 
 class HwControl(SwitchEntity):
     """Representation of a HwControl entity."""
 
-    def __init__(self, name: str, linked_switch: str) -> None:
+    def __init__(self, name: str, linked_entity: str) -> None:
         """Initialize the HwControl."""
         self._name = name
-        self._linked_switch = linked_switch
+        self._linked_entity = linked_entity
 
     async def async_added_to_hass(self) -> None:
         """Run when entity is added to Home Assistant."""
         # Track state changes for the linked switch
         async_track_state_change(
-            self.hass, self._linked_switch, self._handle_linked_switch_change
+            self.hass, self._linked_entity, self._handle_linked_entity_change
         )
 
-    async def _handle_linked_switch_change(self, entity_id, old_state, new_state):
+    async def _handle_linked_entity_change(self, entity_id, old_state, new_state):
         """Handle state changes for the linked switch."""
         # Notify Home Assistant of a state update
         self.schedule_update_ha_state()
@@ -44,22 +44,22 @@ class HwControl(SwitchEntity):
     @property
     def is_on(self) -> bool:
         """Return the state of the switch."""
-        state = self.hass.states.get(self._linked_switch)
+        state = self.hass.states.get(self._linked_entity)
         if state:
             return state.state == "on"
         return False
 
     def turn_on(self, **kwargs) -> None:
         """Turn on the switch."""
-        domain = self.get_domain(self._linked_switch)
-        self.hass.services.call(domain, "turn_on", {"entity_id": self._linked_switch})
+        domain = self.get_domain(self._linked_entity)
+        self.hass.services.call(domain, "turn_on", {"entity_id": self._linked_entity})
         # self._is_on = True
         self.schedule_update_ha_state()
 
     def turn_off(self, **kwargs) -> None:
         """Turn off the switch."""
-        domain = self.get_domain(self._linked_switch)
-        self.hass.services.call(domain, "turn_off", {"entity_id": self._linked_switch})
+        domain = self.get_domain(self._linked_entity)
+        self.hass.services.call(domain, "turn_off", {"entity_id": self._linked_entity})
         # self._is_on = False
         self.schedule_update_ha_state()
 
