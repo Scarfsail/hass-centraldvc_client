@@ -29,7 +29,9 @@ class HwControlConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         data_schema = vol.Schema(
             {
                 vol.Required("name", default="My HW Control"): str,
-                vol.Required("linked_entity"): vol.In(entities),  # Dropdown list
+                vol.Required("linked_entity"): vol.In(
+                    {entity: entity for entity in entities}
+                ),
             }
         )
 
