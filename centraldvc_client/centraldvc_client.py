@@ -33,6 +33,7 @@ class CentralDvcClient:
         def callback(response):
             self.process_initial_load(response)
             self.hub.on("iosChanged", self.process_iosChanged)
+
             send_callback_received.release()
 
         self.hub.send("GetAllIos", [], callback)
@@ -56,11 +57,12 @@ class CentralDvcClient:
         io_visualization: int,
         entityClass: type[CentralDvcEntity],
         async_add_entities: AddEntitiesCallback,
+        device_class: str | None = None,
     ):
         def create_entity(io):
             io_id = io["Id"]
             entity_id = f"centraldvc_{io_id}"
-            entity = entityClass(entity_id, self.entry, self.hass, io)
+            entity = entityClass(entity_id, self.entry, self.hass, io, device_class)
             run_callback_threadsafe(self.hass.loop, async_add_entities, [entity])
             return entity
 
@@ -80,29 +82,10 @@ class CentralDvcClient:
             creator = self.entity_creators.get(visualization)
             if not creator:
                 _LOGGER.warning(
-                    f"No entity creator for visualization: {visualization} with io ID: {io_id}"
-                )  # noqa: G004
+                    f"No entity creator for visualization: {visualization} with io ID: {io_id}"  # noqa: G004
+                )
                 continue
 
             entity = creator(io)
             self.entities[entity_id] = entity
             _LOGGER.info(f"Created entity for io: {io["Title"]}")
-            # if entity:
-            #    entity.update_from_io(io)
-            # else:
-            #    new_entity = self.CentralDvcAnalogSensor(entity_id, entry, io)
-            #    entities_to_add.append(new_entity)
-            #    self.hass.data[DOMAIN][io_id] = new_entity
-
-    #    if entities_to_add:
-    # Add new entities to Home Assistant
-    #        platform = next(
-    #           (
-    #              platform
-    #             for platform in async_get_platforms(hass, DOMAIN)
-    #            if platform.domain == "sensor"
-    #       ),
-    #      None,
-    # )
-    # if platform:
-    #   platform.async_add_entities(entities_to_add)
