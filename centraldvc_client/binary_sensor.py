@@ -1,3 +1,5 @@
+from typing import Callable
+
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -23,9 +25,17 @@ async def async_setup_entry(
 
 
 class CentralDvcBinarySensor(BinarySensorEntity, CentralDvcEntity):
-    def __init__(self, id, config_entry, hass, io, device_clas):
+    def __init__(
+        self,
+        id,
+        config_entry,
+        hass,
+        io,
+        set_io: Callable[[int, str], None],
+        device_clas,
+    ):
         """Initialize the sensor."""
-        super().__init__(id, config_entry, hass, io, device_clas)
+        super().__init__(id, config_entry, hass, io, set_io, device_clas)
         self._state = "on" if io["Value"] else "off"
 
     @property

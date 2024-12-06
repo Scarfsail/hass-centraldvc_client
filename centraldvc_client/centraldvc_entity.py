@@ -4,6 +4,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.event import run_callback_threadsafe
+from typing import Callable
 
 
 class CentralDvcEntity(ABC, Entity):
@@ -13,16 +14,18 @@ class CentralDvcEntity(ABC, Entity):
         config_entry: ConfigEntry,
         hass: HomeAssistant,
         io,
+        set_io: Callable[[int, str], None],
         device_class: str | None = None,
     ):
         self._config_entry = config_entry
         self.hass = hass
-
-        self.io = io
+        self.client_set_io = set_io
 
         if device_class:
             self._attr_device_class = device_class
 
+        self.io = io
+        self.io_id = io["Id"]
         self._id = id
         self._name = io["Title"]
         self._is_online = io["IsOnline"]
@@ -50,3 +53,6 @@ class CentralDvcEntity(ABC, Entity):
     def available(self):
         """Return True if the sensor is available."""
         return self._is_online
+
+    def set_io(self, value: str):
+        self.client_set_io(self.io_id, value)

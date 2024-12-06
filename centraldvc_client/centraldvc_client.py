@@ -62,11 +62,16 @@ class CentralDvcClient:
         def create_entity(io):
             io_id = io["Id"]
             entity_id = f"centraldvc_{io_id}"
-            entity = entityClass(entity_id, self.entry, self.hass, io, device_class)
+            entity = entityClass(
+                entity_id, self.entry, self.hass, io, self.set_io, device_class
+            )
             run_callback_threadsafe(self.hass.loop, async_add_entities, [entity])
             return entity
 
         self.entity_creators[io_visualization] = create_entity
+
+    def set_io(self, io_id: int, value: str) -> None:
+        self.hub.send("SetIo", [{"IoId": io_id, "Value": value, "Answers": []}])
 
     def process_data_update(self, data):
         """Process incoming data and create/update entities accordingly."""
