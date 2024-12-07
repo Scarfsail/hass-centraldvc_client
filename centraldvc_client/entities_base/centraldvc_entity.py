@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from collections.abc import Callable
+import re
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -28,7 +29,9 @@ class CentralDvcEntity(ABC, Entity):
         self.io_id = io["Id"]
         self._id = id
         self._name = io["Title"]
+        self._id_name = f"centraldvc_{self.camel_case_to_snake_case(io["Name"])}"
         self._is_online = io["IsOnline"]
+
         self.io_changed(io)
 
     def update_from_io(self, io):
@@ -41,6 +44,16 @@ class CentralDvcEntity(ABC, Entity):
         self._is_online = False
         run_callback_threadsafe(self.hass.loop, self.async_write_ha_state)
 
+    def camel_case_to_snake_case(self, string: str):
+        # Convert CamelCase to snake_case while treating consecutive uppercase letters as a group
+        string = re.sub(
+            r"(.)([A-Z][a-z]+)", r"\1_\2", string
+        )  # Add underscores between lowercase and uppercase letters
+        string = re.sub(
+            r"([a-z0-9])([A-Z])", r"\1_\2", string
+        )  # Add underscores before single uppercase letters
+        return string.lower()
+
     @abstractmethod
     def io_changed(self, io): ...
 
@@ -48,6 +61,11 @@ class CentralDvcEntity(ABC, Entity):
     def name(self):
         """Return the name of the sensor."""
         return self._name
+
+    @property
+    def suggested_object_id(self):
+        """Return the suggested object id."""
+        return self._id_name
 
     @property
     def unique_id(self):
