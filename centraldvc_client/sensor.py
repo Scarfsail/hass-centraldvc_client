@@ -14,8 +14,8 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ):
     """Set up CentralDvc sensors from a config entry."""
-    client = hass.data[DOMAIN][entry.entry_id]["client"]
-    client.register_entity_type(
+    processor = hass.data[DOMAIN][entry.entry_id]["client"].processor
+    processor.register_entity_type(
         1, EntityDefinition(CentralDvcSensor, async_add_entities)
     )  # Analog
 

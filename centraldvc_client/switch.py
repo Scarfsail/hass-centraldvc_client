@@ -14,16 +14,16 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ):
     """Set up CentralDvc sensors from a config entry."""
-    client = hass.data[DOMAIN][entry.entry_id]["client"]
+    processor = hass.data[DOMAIN][entry.entry_id]["client"].processor
 
-    client.register_entity_type(
+    processor.register_entity_type(
         3,
         EntityDefinition(
             CentralDvcSwitch, async_add_entities, None, lambda io: io["Kind"] == 1
         ),
     )  # Generic
 
-    client.register_entity_type(
+    processor.register_entity_type(
         3,
         EntityDefinition(
             CentralDvcSwitch,
@@ -33,7 +33,7 @@ async def async_setup_entry(
         ),
     )  # Power Plug
 
-    client.register_entity_type(
+    processor.register_entity_type(
         3,
         EntityDefinition(
             CentralDvcSwitch,
@@ -43,7 +43,7 @@ async def async_setup_entry(
         ),
     )  # Sprinkler
 
-    client.register_entity_type(
+    processor.register_entity_type(
         3,
         EntityDefinition(
             CentralDvcSwitch,
@@ -53,7 +53,7 @@ async def async_setup_entry(
         ),
     )  # Water Valve
 
-    client.register_entity_type(
+    processor.register_entity_type(
         3,
         EntityDefinition(
             CentralDvcSwitch,
@@ -63,7 +63,7 @@ async def async_setup_entry(
         ),
     )  # Fan
 
-    client.register_entity_type(
+    processor.register_entity_type(
         3,
         EntityDefinition(
             CentralDvcSwitch,
@@ -73,7 +73,7 @@ async def async_setup_entry(
         ),
     )  # Toshiba AC
 
-    client.register_entity_type(
+    processor.register_entity_type(
         3,
         EntityDefinition(
             CentralDvcSwitch,
@@ -83,7 +83,7 @@ async def async_setup_entry(
         ),
     )  # Ev Charger
 
-    client.register_entity_type(
+    processor.register_entity_type(
         3,
         EntityDefinition(
             CentralDvcSwitch,
