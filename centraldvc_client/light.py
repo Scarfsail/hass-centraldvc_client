@@ -37,6 +37,7 @@ class CentralDvcLight(LightEntity, CentralDvcEntity):
         """Initialize the sensor."""
         super().__init__(id, config_entry, hass, io, set_io, device_clas)
         self._attr_supported_color_modes = [ColorMode.ONOFF]
+        self._attr_color_mode = ColorMode.ONOFF
 
     @property
     def is_on(self):
