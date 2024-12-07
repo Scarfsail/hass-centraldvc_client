@@ -37,6 +37,10 @@ class CentralDvcEntity(ABC, Entity):
         self.io_changed(self.io)
         run_callback_threadsafe(self.hass.loop, self.async_write_ha_state)
 
+    def set_is_offline(self):
+        self._is_online = False
+        run_callback_threadsafe(self.hass.loop, self.async_write_ha_state)
+
     @abstractmethod
     def io_changed(self, io): ...
 

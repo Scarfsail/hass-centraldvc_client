@@ -26,7 +26,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     entry.async_on_unload(
         # only start after all platforms have had a chance to subscribe
-        await client.start()
+        client.connect()
     )
 
     return True

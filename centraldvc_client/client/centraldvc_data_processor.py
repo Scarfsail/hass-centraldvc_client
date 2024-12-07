@@ -11,7 +11,12 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class CentralDvcDataProcessor:
-    def __init__(self,hass: HomeAssistant,entry: ConfigEntry,set_io: Callable[[int, str], None]):
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        entry: ConfigEntry,
+        set_io: Callable[[int, str], None],
+    ):
         self.hass = hass
         self.entry = entry
         self.set_io = set_io
@@ -45,6 +50,10 @@ class CentralDvcDataProcessor:
             self.hass.loop, entity_definition.async_add_entities, [entity]
         )
         return entity
+
+    def set_all_entities_offline(self):
+        for entity in self.entities.values():
+            entity.set_is_offline()
 
     def process_data_update(self, data):
         """Process incoming data and create/update entities accordingly."""
