@@ -1,4 +1,4 @@
-from typing import Callable
+from collections.abc import Callable
 
 from homeassistant.components.button import ButtonEntity
 from homeassistant.config_entries import ConfigEntry

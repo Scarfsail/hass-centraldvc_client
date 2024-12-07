@@ -1,6 +1,6 @@
 from collections.abc import Callable
 
-from homeassistant.components.binary_sensor import BinarySensorEntity
+from homeassistant.components.switch import SwitchDeviceClass, SwitchEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -14,17 +14,11 @@ async def async_setup_entry(
 ):
     """Set up CentralDvc sensors from a config entry."""
     client = hass.data[DOMAIN][entry.entry_id]["client"]
-    client.register_entity_type(2, CentralDvcBinarySensor, async_add_entities, "door")
-    client.register_entity_type(7, CentralDvcBinarySensor, async_add_entities, "motion")
-    client.register_entity_type(
-        8, CentralDvcBinarySensor, async_add_entities, "garage_door"
-    )
-    client.register_entity_type(
-        13, CentralDvcBinarySensor, async_add_entities
-    )  # Digital
+
+    client.register_entity_type(3, CentralDvcSwitch, async_add_entities)  # HwControl
 
 
-class CentralDvcBinarySensor(BinarySensorEntity, CentralDvcEntity):
+class CentralDvcSwitch(SwitchEntity, CentralDvcEntity):
     def __init__(
         self,
         id,
@@ -36,12 +30,22 @@ class CentralDvcBinarySensor(BinarySensorEntity, CentralDvcEntity):
     ):
         """Initialize the sensor."""
         super().__init__(id, config_entry, hass, io, set_io, device_clas)
+        if io["Kind"] == 3:
+            self._attr_device_class = SwitchDeviceClass.OUTLET
 
     @property
-    def state(self):
+    def is_on(self):
         """Return the state of the sensor."""
         return self._state
 
+    async def async_turn_on(self, **kwargs):
+        """Turn the entity on."""
+        self.set_io("1:1")
+
+    async def async_turn_off(self, **kwargs):
+        """Turn the entity off."""
+        self.set_io("1:2")
+
     def io_changed(self, io):
         """Update the sensor state and availability from the new IO data."""
-        self._state = "on" if io["Value"] else "off"
+        self._state = io["Value"]

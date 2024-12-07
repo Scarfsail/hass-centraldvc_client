@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.event import run_callback_threadsafe
-from typing import Callable
 
 
 class CentralDvcEntity(ABC, Entity):
@@ -29,6 +29,7 @@ class CentralDvcEntity(ABC, Entity):
         self._id = id
         self._name = io["Title"]
         self._is_online = io["IsOnline"]
+        self.io_changed(io)
 
     def update_from_io(self, io):
         self.io = self.io | io

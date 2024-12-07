@@ -1,4 +1,4 @@
-from typing import Callable
+from collections.abc import Callable
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
@@ -29,7 +29,6 @@ class CentralDvcSensor(SensorEntity, CentralDvcEntity):
     ):
         """Initialize the sensor."""
         super().__init__(id, config_entry, hass, io, set_io, device_clas)
-        self._state = io["Value"]
         self._units = io["Units"]
 
     @property
