@@ -5,8 +5,9 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .centraldvc_entity import CentralDvcEntity
 from .const import DOMAIN
+from .entities_base.centraldvc_entity import CentralDvcEntity
+from .entities_base.entity_definition import EntityDefinition
 
 
 async def async_setup_entry(
@@ -15,7 +16,82 @@ async def async_setup_entry(
     """Set up CentralDvc sensors from a config entry."""
     client = hass.data[DOMAIN][entry.entry_id]["client"]
 
-    client.register_entity_type(3, CentralDvcSwitch, async_add_entities)  # HwControl
+    client.register_entity_type(
+        3,
+        EntityDefinition(
+            CentralDvcSwitch, async_add_entities, None, lambda io: io["Kind"] == 1
+        ),
+    )  # Generic
+
+    client.register_entity_type(
+        3,
+        EntityDefinition(
+            CentralDvcSwitch,
+            async_add_entities,
+            SwitchDeviceClass.OUTLET,
+            lambda io: io["Kind"] == 3,
+        ),
+    )  # Power Plug
+
+    client.register_entity_type(
+        3,
+        EntityDefinition(
+            CentralDvcSwitch,
+            async_add_entities,
+            SwitchDeviceClass.OUTLET,
+            lambda io: io["Kind"] == 4,
+        ),
+    )  # Sprinkler
+
+    client.register_entity_type(
+        3,
+        EntityDefinition(
+            CentralDvcSwitch,
+            async_add_entities,
+            SwitchDeviceClass.OUTLET,
+            lambda io: io["Kind"] == 5,
+        ),
+    )  # Water Valve
+
+    client.register_entity_type(
+        3,
+        EntityDefinition(
+            CentralDvcSwitch,
+            async_add_entities,
+            SwitchDeviceClass.OUTLET,
+            lambda io: io["Kind"] == 6,
+        ),
+    )  # Fan
+
+    client.register_entity_type(
+        3,
+        EntityDefinition(
+            CentralDvcSwitch,
+            async_add_entities,
+            SwitchDeviceClass.OUTLET,
+            lambda io: io["Kind"] == 7,
+        ),
+    )  # Toshiba AC
+
+    client.register_entity_type(
+        3,
+        EntityDefinition(
+            CentralDvcSwitch,
+            async_add_entities,
+            SwitchDeviceClass.OUTLET,
+            lambda io: io["Kind"] == 8,
+        ),
+    )  # Ev Charger
+
+    client.register_entity_type(
+        3,
+        EntityDefinition(
+            CentralDvcSwitch,
+            async_add_entities,
+            SwitchDeviceClass.OUTLET,
+            lambda io: io["Kind"] == 9,
+        ),
+    )  # Pool Heat pump
 
 
 class CentralDvcSwitch(SwitchEntity, CentralDvcEntity):
@@ -30,8 +106,6 @@ class CentralDvcSwitch(SwitchEntity, CentralDvcEntity):
     ):
         """Initialize the sensor."""
         super().__init__(id, config_entry, hass, io, set_io, device_clas)
-        if io["Kind"] == 3:
-            self._attr_device_class = SwitchDeviceClass.OUTLET
 
     @property
     def is_on(self):

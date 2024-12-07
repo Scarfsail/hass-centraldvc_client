@@ -1,6 +1,6 @@
 from collections.abc import Callable
 
-from homeassistant.components.button import ButtonEntity
+from homeassistant.components.light import ColorMode, LightEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -17,11 +17,14 @@ async def async_setup_entry(
     client = hass.data[DOMAIN][entry.entry_id]["client"]
 
     client.register_entity_type(
-        16, EntityDefinition(CentralDvcButton, async_add_entities)
-    )  # DigitalPulse
+        3,
+        EntityDefinition(
+            CentralDvcLight, async_add_entities, None, lambda io: io["Kind"] == 2
+        ),
+    )  # Light
 
 
-class CentralDvcButton(ButtonEntity, CentralDvcEntity):
+class CentralDvcLight(LightEntity, CentralDvcEntity):
     def __init__(
         self,
         id,
@@ -33,10 +36,21 @@ class CentralDvcButton(ButtonEntity, CentralDvcEntity):
     ):
         """Initialize the sensor."""
         super().__init__(id, config_entry, hass, io, set_io, device_clas)
+        self._attr_supported_color_modes = [ColorMode.ONOFF]
 
-    async def async_press(self) -> None:
-        """Handle the button press."""
-        self.set_io("1")
+    @property
+    def is_on(self):
+        """Return the state of the sensor."""
+        return self._state
+
+    async def async_turn_on(self, **kwargs):
+        """Turn the entity on."""
+        self.set_io("1:1")
+
+    async def async_turn_off(self, **kwargs):
+        """Turn the entity off."""
+        self.set_io("1:2")
 
     def io_changed(self, io):
         """Update the sensor state and availability from the new IO data."""
+        self._state = io["Value"]

@@ -2,7 +2,7 @@ import logging
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-from .centraldvc_client import CentralDvcClient
+from .client.centraldvc_client import CentralDvcClient
 from .const import DOMAIN
 from .sensor import CentralDvcSensor
 
@@ -21,7 +21,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     # Forward setup for the sensor platform
     await hass.config_entries.async_forward_entry_setups(
-        entry, ["sensor", "binary_sensor", "button", "switch"]
+        entry, ["sensor", "binary_sensor", "button", "switch", "light"]
     )
 
     entry.async_on_unload(

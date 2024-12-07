@@ -5,8 +5,9 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .centraldvc_entity import CentralDvcEntity
 from .const import DOMAIN
+from .entities_base.centraldvc_entity import CentralDvcEntity
+from .entities_base.entity_definition import EntityDefinition
 
 
 async def async_setup_entry(
@@ -14,7 +15,9 @@ async def async_setup_entry(
 ):
     """Set up CentralDvc sensors from a config entry."""
     client = hass.data[DOMAIN][entry.entry_id]["client"]
-    client.register_entity_type(1, CentralDvcSensor, async_add_entities)  # Analog
+    client.register_entity_type(
+        1, EntityDefinition(CentralDvcSensor, async_add_entities)
+    )  # Analog
 
 
 class CentralDvcSensor(SensorEntity, CentralDvcEntity):
