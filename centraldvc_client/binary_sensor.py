@@ -22,9 +22,6 @@ async def async_setup_entry(
         7, EntityDefinition(CentralDvcBinarySensor, async_add_entities, "motion")
     )
     processor.register_entity_type(
-        8, EntityDefinition(CentralDvcBinarySensor, async_add_entities, "garage_door")
-    )
-    processor.register_entity_type(
         13, EntityDefinition(CentralDvcBinarySensor, async_add_entities)
     )  # Digital
 

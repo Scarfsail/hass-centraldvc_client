@@ -35,6 +35,9 @@ class CentralDvcConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="user", data_schema=data_schema, errors=None
         )
 
+    async def async_step_reauth(self, user_input=None):
+        pass
+
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):

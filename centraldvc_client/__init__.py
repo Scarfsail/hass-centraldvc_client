@@ -21,7 +21,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     # Forward setup for the sensor platform
     await hass.config_entries.async_forward_entry_setups(
-        entry, ["sensor", "binary_sensor", "button", "switch", "light"]
+        entry, ["sensor", "binary_sensor", "button", "switch", "light", "cover"]
     )
 
     entry.async_on_unload(
