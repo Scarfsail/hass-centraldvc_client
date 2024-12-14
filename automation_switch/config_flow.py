@@ -13,7 +13,7 @@ class AutomationSwitchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         if user_input is not None:
             return self.async_create_entry(
-                title=user_input["name"],
+                title=user_input["linked_entity"],
                 data={
                     "linked_entity": user_input["linked_entity"],
                 },
