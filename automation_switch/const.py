@@ -1,0 +1,1 @@
+DOMAIN = "automation_switch"
