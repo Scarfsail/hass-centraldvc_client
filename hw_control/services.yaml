@@ -1,0 +1,27 @@
+turn_on:
+  target:
+    entity:
+      domain: select
+      integration: hw_control
+
+turn_off:
+  target:
+    entity:
+      domain: select
+      integration: hw_control
+
+set_auto:
+  target:
+    entity:
+      domain: select
+      integration: hw_control
+
+set_value_when_auto:
+  target:
+    entity:
+      domain: select
+      integration: hw_control
+  fields:
+    value:
+      required: true
+      example: true
