@@ -1,25 +1,7 @@
-turn_on:
-  target:
-    entity:
-      domain: select
-      integration: automation_switch
-
-turn_off:
-  target:
-    entity:
-      domain: select
-      integration: automation_switch
-
-set_auto:
-  target:
-    entity:
-      domain: select
-      integration: automation_switch
-
 set_value_when_auto:
   target:
     entity:
-      domain: select
+      domain: switch
       integration: automation_switch
   fields:
     value:

@@ -1,1 +1,0 @@
-DOMAIN = "hw_control"

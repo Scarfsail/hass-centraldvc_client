@@ -1,9 +1,0 @@
-{
-    "domain": "hw_control",
-    "name": "HW Control",
-    "version": "1.0.0",
-    "dependencies": [],
-    "codeowners": ["@scarfsail"],
-    "requirements": [],
-    "config_flow": true
-  }
