@@ -1,0 +1,130 @@
+import voluptuous as vol
+
+from homeassistant.components.switch import SwitchEntity
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers import config_validation as cv, entity_platform
+from homeassistant.helpers.event import async_track_state_change
+from homeassistant.helpers.restore_state import RestoreEntity
+
+# from .const import DOMAIN
+
+
+async def async_setup_entry(
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities
+):
+    """Set up the switch platform from a config entry."""
+    name = entry.data["name"]
+    linked_entity = entry.data["linked_entity"]
+
+    async_add_entities([AutomationSwitch(name, linked_entity)])
+
+    register_services()
+
+
+def register_services():
+    def set_value_when_auto(entity: AutomationSwitch, service_call):
+        entity.set_value_when_auto(service_call.data["value"])
+
+    platform = entity_platform.async_get_current_platform()
+
+    platform.async_register_entity_service(
+        "set_value_when_auto",
+        {vol.Required("value"): cv.boolean},
+        set_value_when_auto,
+    )
+
+
+class AutomationSwitch(SwitchEntity, RestoreEntity):
+    """Representation of a HwControl entity."""
+
+    def __init__(self, name: str, linked_entity: str) -> None:
+        """Initialize the HwControl."""
+        self._name = name
+        self._linked_entity = linked_entity
+        self._value_when_auto = False
+        self._is_on = False
+
+    async def async_added_to_hass(self) -> None:
+        """Run when entity is added to Home Assistant."""
+        # Track state changes for the linked switch
+        async_track_state_change(
+            self.hass, self._linked_entity, self._handle_linked_entity_change
+        )
+
+    async def _handle_linked_entity_change(self, entity_id, old_state, new_state):
+        """Handle state changes for the linked switch."""
+        # Notify Home Assistant of a state update
+        self.schedule_update_ha_state()
+
+    @property
+    def name(self) -> str:
+        """Return the name of the switch."""
+        return self._name
+
+    @property
+    def is_on(self) -> bool:
+        """Return the state of the switch."""
+        # state = self.hass.states.get(self._linked_entity)
+        # if state:
+        #    return state.state == "on"
+        return self._is_on
+
+    @property
+    def extra_state_attributes(self):
+        """Return the state attributes."""
+        return {"value_when_auto": self._value_when_auto}
+
+    def turn_on(self, **kwargs) -> None:
+        """Turn on the switch."""
+
+        domain = self.get_domain(self._linked_entity)
+        self.hass.services.call(
+            domain,
+            "turn_on" if self._value_when_auto else "turn_off",
+            {"entity_id": self._linked_entity},
+        )
+        self._is_on = True
+        self.schedule_update_ha_state()
+
+    def turn_off(self, **kwargs) -> None:
+        """Turn off the switch."""
+        # domain = self.get_domain(self._linked_entity)
+        # self.hass.services.call(domain, "turn_off", {"entity_id": self._linked_entity})
+        self._is_on = False
+
+        self.schedule_update_ha_state()
+
+    def set_value_when_auto(self, value):
+        if self._value_when_auto == value:
+            return
+
+        self._value_when_auto = value
+        domain = self.get_domain(self._linked_entity)
+
+        if self.is_on:
+            if value:
+                self.hass.services.call(
+                    domain, "turn_on", {"entity_id": self._linked_entity}
+                )
+            else:
+                self.hass.services.call(
+                    domain, "turn_off", {"entity_id": self._linked_entity}
+                )
+
+        self.schedule_update_ha_state()
+
+    async def async_added_to_hass(self):
+        """Restore state when the entity is added to hass."""
+        await super().async_added_to_hass()
+        # Retrieve the previous state
+
+        old_state = await self.async_get_last_state()
+        if old_state and old_state.state == "on":
+            self._is_on = True
+        elif old_state and old_state.state == "off":
+            self._is_on = False
+
+    def get_domain(self, entity_id):
+        """Get domain from entity ID."""
+        return entity_id.split(".")[0]
