@@ -15,7 +15,6 @@ class AutomationSwitchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_create_entry(
                 title=user_input["name"],
                 data={
-                    "name": user_input["name"],
                     "linked_entity": user_input["linked_entity"],
                 },
             )
@@ -28,7 +27,6 @@ class AutomationSwitchConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         # Create the dropdown schema
         data_schema = vol.Schema(
             {
-                vol.Required("name", default="My Automation Switch"): str,
                 vol.Required("linked_entity"): vol.In(
                     {entity: entity for entity in entities}
                 ),

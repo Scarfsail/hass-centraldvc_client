@@ -14,10 +14,9 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities
 ):
     """Set up the switch platform from a config entry."""
-    name = entry.data["name"]
     linked_entity = entry.data["linked_entity"]
 
-    async_add_entities([AutomationSwitch(name, linked_entity)])
+    async_add_entities([AutomationSwitch(linked_entity)])
 
     register_services()
 
@@ -38,9 +37,9 @@ def register_services():
 class AutomationSwitch(SwitchEntity, RestoreEntity):
     """Representation of a HwControl entity."""
 
-    def __init__(self, name: str, linked_entity: str) -> None:
+    def __init__(self, linked_entity: str) -> None:
         """Initialize the HwControl."""
-        self._name = name
+        self._id = linked_entity + "_automation"
         self._linked_entity = linked_entity
         self._value_when_auto = False
         self._is_on = False
@@ -60,7 +59,19 @@ class AutomationSwitch(SwitchEntity, RestoreEntity):
     @property
     def name(self) -> str:
         """Return the name of the switch."""
-        return self._name
+        state = self.hass.states.get(self._linked_entity)
+        return self._id if state is None else state.name + " Automation"
+        # return self._name
+
+    @property
+    def suggested_object_id(self):
+        """Return the suggested object id."""
+        return self._id
+
+    @property
+    def unique_id(self):
+        """Return a unique ID for the sensor."""
+        return self._id
 
     @property
     def is_on(self) -> bool:
