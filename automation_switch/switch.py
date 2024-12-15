@@ -3,20 +3,47 @@ import voluptuous as vol
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import config_validation as cv, entity_platform
+from homeassistant.helpers import (
+    config_validation as cv,
+    entity_platform,
+    entity_registry,
+)
 from homeassistant.helpers.event import async_track_state_change
 from homeassistant.helpers.restore_state import RestoreEntity
 
-# from .const import DOMAIN
+from .const import DOMAIN
 
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities
 ):
     """Set up the switch platform from a config entry."""
-    linked_entity = entry.data["linked_entity"]
+    selected_entities = entry.data["entities"]
 
-    async_add_entities([AutomationSwitch(linked_entity)])
+    # Get the entity registry
+    entity_registry_obj = entity_registry.async_get(hass)
+
+    # Remove entities that are no longer selected
+    existing_entities = [
+        entity
+        for entity in entity_registry_obj.entities.values()
+        if entity.config_entry_id == entry.entry_id
+    ]
+    selected_entities_automation = [
+        "switch." + compose_automation_switch_id(entity_id)
+        for entity_id in selected_entities
+    ]
+    for entity in existing_entities:
+        if entity.entity_id not in selected_entities_automation:
+            entity_registry_obj.async_remove(entity.entity_id)
+
+    # Add new entities that are not yet created
+
+    automation_switches = [
+        AutomationSwitch(entity_id) for entity_id in selected_entities
+    ]
+
+    async_add_entities(automation_switches)
 
     register_services()
 
@@ -34,12 +61,16 @@ def register_services():
     )
 
 
+def compose_automation_switch_id(linked_entity_id: str):
+    return linked_entity_id.replace(".", "_") + "_automation"
+
+
 class AutomationSwitch(SwitchEntity, RestoreEntity):
     """Representation of a HwControl entity."""
 
     def __init__(self, linked_entity: str) -> None:
         """Initialize the HwControl."""
-        self._id = linked_entity + "_automation"
+        self._id = compose_automation_switch_id(linked_entity)
         self._linked_entity = linked_entity
         self._value_when_auto = False
         self._is_on = False
