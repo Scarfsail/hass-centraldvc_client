@@ -112,9 +112,11 @@ class AutomationSwitch(SwitchEntity, RestoreEntity):
         #    return state.state == "on"
         return self._is_on
 
-    # @property
-    # def available(self) -> bool:
-    #    """Return if the switch is available."""
+    @property
+    def available(self) -> bool:
+        """Return if the switch is available."""
+        return True
+
     #    linked_entity = self.hass.states.get(self._linked_entity_id)
     #    return linked_entity is not None and linked_entity.state != "unavailable"
 
