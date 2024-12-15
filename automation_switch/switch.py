@@ -68,10 +68,10 @@ def compose_automation_switch_id(linked_entity_id: str):
 class AutomationSwitch(SwitchEntity, RestoreEntity):
     """Representation of a HwControl entity."""
 
-    def __init__(self, linked_entity: str) -> None:
+    def __init__(self, linked_entity_id: str) -> None:
         """Initialize the HwControl."""
-        self._id = compose_automation_switch_id(linked_entity)
-        self._linked_entity = linked_entity
+        self._id = compose_automation_switch_id(linked_entity_id)
+        self._linked_entity_id = linked_entity_id
         self._value_when_auto = False
         self._is_on = False
 
@@ -79,7 +79,7 @@ class AutomationSwitch(SwitchEntity, RestoreEntity):
         """Run when entity is added to Home Assistant."""
         # Track state changes for the linked switch
         async_track_state_change(
-            self.hass, self._linked_entity, self._handle_linked_entity_change
+            self.hass, self._linked_entity_id, self._handle_linked_entity_change
         )
 
     async def _handle_linked_entity_change(self, entity_id, old_state, new_state):
@@ -90,7 +90,7 @@ class AutomationSwitch(SwitchEntity, RestoreEntity):
     @property
     def name(self) -> str:
         """Return the name of the switch."""
-        state = self.hass.states.get(self._linked_entity)
+        state = self.hass.states.get(self._linked_entity_id)
         return self._id if state is None else state.name + " Automation"
         # return self._name
 
@@ -112,19 +112,32 @@ class AutomationSwitch(SwitchEntity, RestoreEntity):
         #    return state.state == "on"
         return self._is_on
 
+    # @property
+    # def available(self) -> bool:
+    #    """Return if the switch is available."""
+    #    linked_entity = self.hass.states.get(self._linked_entity_id)
+    #    return linked_entity is not None and linked_entity.state != "unavailable"
+
     @property
     def extra_state_attributes(self):
         """Return the state attributes."""
-        return {"value_when_auto": self._value_when_auto}
+        linked_entity = self.hass.states.get(self._linked_entity_id)
+        linked_entity_state = linked_entity.state if linked_entity else None
+
+        return {
+            "value_when_auto": self._value_when_auto,
+            "linked_entity_state": linked_entity_state,
+            "linked_entity_id": self._linked_entity_id,
+        }
 
     def turn_on(self, **kwargs) -> None:
         """Turn on the switch."""
 
-        domain = self.get_domain(self._linked_entity)
+        domain = self.get_domain(self._linked_entity_id)
         self.hass.services.call(
             domain,
             "turn_on" if self._value_when_auto else "turn_off",
-            {"entity_id": self._linked_entity},
+            {"entity_id": self._linked_entity_id},
         )
         self._is_on = True
         self.schedule_update_ha_state()
@@ -142,16 +155,16 @@ class AutomationSwitch(SwitchEntity, RestoreEntity):
             return
 
         self._value_when_auto = value
-        domain = self.get_domain(self._linked_entity)
+        domain = self.get_domain(self._linked_entity_id)
 
         if self.is_on:
             if value:
                 self.hass.services.call(
-                    domain, "turn_on", {"entity_id": self._linked_entity}
+                    domain, "turn_on", {"entity_id": self._linked_entity_id}
                 )
             else:
                 self.hass.services.call(
-                    domain, "turn_off", {"entity_id": self._linked_entity}
+                    domain, "turn_off", {"entity_id": self._linked_entity_id}
                 )
 
         self.schedule_update_ha_state()
