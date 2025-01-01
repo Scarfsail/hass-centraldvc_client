@@ -4,6 +4,7 @@ from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.restore_state import RestoreEntity
 
 from .const import DOMAIN
 from .entities_base.centraldvc_entity import CentralDvcEntity
@@ -26,7 +27,7 @@ async def async_setup_entry(
     )  # Digital
 
 
-class CentralDvcBinarySensor(BinarySensorEntity, CentralDvcEntity):
+class CentralDvcBinarySensor(BinarySensorEntity, CentralDvcEntity, RestoreEntity):
     def __init__(
         self,
         id,
@@ -47,3 +48,20 @@ class CentralDvcBinarySensor(BinarySensorEntity, CentralDvcEntity):
     def io_changed(self, io):
         """Update the sensor state and availability from the new IO data."""
         self._state = "on" if io["Value"] else "off"
+        self._state_last_changed = io["LastChange"]
+
+    @property
+    def extra_state_attributes(self):
+        """Return the state attributes."""
+
+        return {
+            "state_last_changed": self._state_last_changed,
+        }
+
+    async def async_added_to_hass(self):
+        """Restore state when the entity is added to hass."""
+        await super().async_added_to_hass()
+        # Retrieve the previous state
+
+        old_state = await self.async_get_last_state()
+        self._state_last_changed = old_state.attributes.get("state_last_changed", None)
