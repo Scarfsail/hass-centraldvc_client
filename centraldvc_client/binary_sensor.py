@@ -25,6 +25,9 @@ async def async_setup_entry(
     processor.register_entity_type(
         13, EntityDefinition(CentralDvcBinarySensor, async_add_entities)
     )  # Digital
+    processor.register_entity_type(
+        8, EntityDefinition(CentralDvcBinarySensor, async_add_entities, "garage_door")
+    )  # Gate
 
 
 class CentralDvcBinarySensor(BinarySensorEntity, CentralDvcEntity, RestoreEntity):
@@ -64,4 +67,7 @@ class CentralDvcBinarySensor(BinarySensorEntity, CentralDvcEntity, RestoreEntity
         # Retrieve the previous state
 
         old_state = await self.async_get_last_state()
-        self._state_last_changed = old_state.attributes.get("state_last_changed", None)
+        if old_state is not None:
+            self._state_last_changed = old_state.attributes.get(
+                "state_last_changed", None
+            )

@@ -52,8 +52,9 @@ class CentralDvcDataProcessor:
         return entity
 
     def set_all_entities_offline(self):
-        for entity in self.entities.values():
-            entity.set_is_offline()
+        for entities in self.entities.values():
+            for entity in entities:
+                entity.set_is_offline()
 
     def process_data_update(self, data):
         """Process incoming data and create/update entities accordingly."""
@@ -61,9 +62,10 @@ class CentralDvcDataProcessor:
         for io in data:
             io_id = io["Id"]
             entity_id = f"centraldvc_{io_id}"
-            entity = self.entities.get(entity_id)
-            if entity:
-                entity.update_from_io(io)
+            entities = self.entities.get(entity_id)
+            if entities:
+                for entity in entities:
+                    entity.update_from_io(io)
                 continue
 
             visualization = io.get("Visualization")
@@ -75,24 +77,16 @@ class CentralDvcDataProcessor:
                     f"No entity definitions for visualization: {visualization} with io ID: {io_id}"  # noqa: G004
                 )
                 continue
-            entity = None
-
+            # entity = None
+            entities = []
             for entity_definition in entity_definitions:
-                if not entity_definition.selector:
-                    if len(entity_definitions) > 1:
-                        _LOGGER.warning(
-                            f"Selector is not specified for entity visualization: {visualization} with multiple definitions. IO ID: {io_id}"
-                        )  # noqa: G004
-                    else:
-                        entity = self.create_entity(entity_definition, io)
-                        break
-                elif entity_definition.selector(io):
+                if not entity_definition.selector or entity_definition.selector(io):
                     entity = self.create_entity(entity_definition, io)
-                    break
+                    entities.append(entity)
 
-            if entity is not None:
-                self.entities[entity_id] = entity
-                _LOGGER.info(f"Created entity for io: {io["Title"]}")
+            if len(entities) > 0:
+                self.entities[entity_id] = entities
+                _LOGGER.info(f"Created {len(entities)} entities for io: {io["Title"]}")
             else:
                 _LOGGER.warning(
                     f"No entity definition found for visualization: {visualization} with io ID: {io_id}"
