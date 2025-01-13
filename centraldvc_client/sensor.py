@@ -1,6 +1,6 @@
 from collections.abc import Callable
 
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import SensorEntity, SensorStateClass
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -43,6 +43,11 @@ class CentralDvcSensor(SensorEntity, CentralDvcEntity):
     def unit_of_measurement(self):
         """Return the unit of measurement."""
         return self._units
+
+    @property
+    def state_class(self):
+        """Return the state class of the sensor."""
+        return SensorStateClass.MEASUREMENT
 
     def io_changed(self, io):
         """Update the sensor state and availability from the new IO data."""
