@@ -1,1 +1,0 @@
-DOMAIN = "automation_switch"

@@ -1,9 +1,0 @@
-{
-    "domain": "automation_switch",
-    "name": "Automation switch",
-    "version": "1.0.0",
-    "dependencies": [],
-    "codeowners": ["@scarfsail"],
-    "requirements": [],
-    "config_flow": true
-  }

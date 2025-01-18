@@ -1,9 +1,0 @@
-set_value_when_auto:
-  target:
-    entity:
-      domain: switch
-      integration: automation_switch
-  fields:
-    value:
-      required: true
-      example: true
