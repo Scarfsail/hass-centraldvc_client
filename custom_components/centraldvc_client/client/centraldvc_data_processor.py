@@ -73,7 +73,7 @@ class CentralDvcDataProcessor:
                 visualization
             )
             if not entity_definitions:
-                _LOGGER.warning(
+                _LOGGER.debug(
                     f"No entity definitions for visualization: {visualization} with io ID: {io_id}"  # noqa: G004
                 )
                 continue
@@ -88,6 +88,6 @@ class CentralDvcDataProcessor:
                 self.entities[entity_id] = entities
                 _LOGGER.info(f"Created {len(entities)} entities for io: {io["Title"]}")
             else:
-                _LOGGER.warning(
+                _LOGGER.debug(
                     f"No entity definition found for visualization: {visualization} with io ID: {io_id}"
                 )  # noqa: G004
